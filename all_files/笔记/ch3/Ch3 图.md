@@ -4,7 +4,7 @@
 
 - 无向图
 
-  <img src="/Users/gump/大二资料（更新版）/alg/笔记/ch3/assert/image-20250528212757470.png" alt="image-2025052821275740" style="zoom:80%;" />
+  <img src="./assert/image-20250528212757470.png" alt="image-2025052821275740" style="zoom:80%;" />
 
 图的两种表示：
 
@@ -139,4 +139,4 @@ DAG(有向无环图)
 
 Pf.考虑边逐次递减的代价O(m);追踪被删除的结点代价O(n).
 
-<img src="/Users/gump/大二资料（更新版）/alg/笔记/ch3/assert/image-20250528222650905.png" alt="image-20250528222650905" style="zoom:80%;" />
+<img src="./assert/image-20250528222650905.png" alt="image-20250528222650905" style="zoom:80%;" />

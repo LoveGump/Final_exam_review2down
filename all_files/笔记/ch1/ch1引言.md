@@ -22,7 +22,7 @@
 
 你有某种资源（报告厅，超级计算机，电子显微镜），许多人需要在某个时间段使用这个资源。一个**需求**是从时刻s开始，到时刻f结束。假设每个时刻至多一个人使用这个资源。一个调度员接收了一系列的需求，他需要做出决定：目的是使得**被接收的需求数目最大**。
 
-<img src="/Users/gump/大二资料（更新版）/alg/笔记/ch1/assert/image-20250528195017598.png" alt="image-2025058195017598" style="zoom:50%;" />
+<img src="./assert/image-20250528195017598.png" alt="image-2025058195017598" style="zoom:50%;" />
 
 策略：选择结束时间最早的
 
@@ -38,7 +38,7 @@
 
 递归子问题：
 
-<img src="/Users/gump/大二资料（更新版）/alg/笔记/ch1/assert/image-20250528195513545.png" alt="image-20250528195513545" style="zoom:50%;" />
+<img src="./assert/image-20250528195513545.png" alt="image-20250528195513545" style="zoom:50%;" />
 
 策略：进行递归找到最优解
 
@@ -60,7 +60,7 @@
 
 其中归并就是一个很好的分治思想的应用
 
-<img src="/Users/gump/大二资料（更新版）/alg/笔记/ch1/assert/image-20250528195812745.png" alt="image-2025052195812745" style="zoom:50%;" />
+<img src="./assert/image-20250528195812745.png" alt="image-2025052195812745" style="zoom:50%;" />
 
 
 
@@ -127,7 +127,7 @@ while (some man is free and hasn't proposed to every woman) {
 
 女人先对优先表做预处理：
 
-<img src="/Users/gump/大二资料（更新版）/alg/笔记/ch1/assert/image-20250528202934920.png" alt="image-20250528202934920" style="zoom:75%;" />
+<img src="./assert/image-20250528202934920.png" alt="image-20250528202934920" style="zoom:75%;" />
 
 命题：G-S算法所有的执行会得到同样的匹配，
 
