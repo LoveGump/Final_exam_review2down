@@ -655,7 +655,7 @@ Dijkstra 算法的核心思想是**贪心策略 (Greedy Strategy)**，并结合�
 
 ---
 
-## 算法步骤 (Algorithm Steps)
+### 算法步骤 (Algorithm Steps)
 
 以下是 Dijkstra 算法更具体的步骤：
 
@@ -680,7 +680,7 @@ Dijkstra 算法的核心思想是**贪心策略 (Greedy Strategy)**，并结合�
 
 ---
 
-## 图解示例 (Illustrative Example)
+### 图解示例 (Illustrative Example)
 
 ![Dijkstra Algorithm Animation](https://upload.wikimedia.org/wikipedia/commons/5/57/Dijkstra_Animation.gif)
 *(图片来源: Wikimedia Commons, 作者: Redjar)*
@@ -689,7 +689,7 @@ Dijkstra 算法的核心思想是**贪心策略 (Greedy Strategy)**，并结合�
 
 ---
 
-## 优缺点 (Advantages and Disadvantages)
+### 优缺点 (Advantages and Disadvantages)
 
 **优点 (Advantages):**
 
@@ -704,28 +704,271 @@ Dijkstra 算法的核心思想是**贪心策略 (Greedy Strategy)**，并结合�
 * **单源限制**: 算法计算的是从一个源点到所有其他节点的最短路径。如果需要计算所有节点对之间的最短路径，可以对每个节点运行一次 Dijkstra 算法，或者使用 Floyd-Warshall 算法。
 * **全局搜索**: 对于某些特定场景，如果只需要找到到单个目标点的最短路径，且图中存在启发式信息（例如地理位置），A\* 算法可能会更高效。
 
----
+### 代码
 
-## 应用 (Applications)
+```c++
+#include <algorithm>
+#include <iostream>
+#include <limits>
+#include <queue>
+#include <vector>
+using namespace std;
 
-Dijkstra 算法在许多领域都有广泛的应用，例如：
+class DijkstraHeap {
+   private:
+    int vertices;
+    vector<vector<pair<int, int>>> graph;  // 邻接表存储图，pair<目标顶点, 权重>
 
-* **网络路由**: 许多路由协议（如 OSPF）使用 Dijkstra 算法来计算网络中数据包的最佳传输路径。
-* **地图导航**: GPS导航系统和在线地图服务（如谷歌地图、高德地图）使用类似 Dijkstra 的算法来规划最短或最快的行车路线。
-* **交通规划**: 用于分析和优化交通流量，规划公共交通线路。
-* **物流配送**: 优化货物的配送路线，以降低成本和时间。
-* **机器人路径规划**: 帮助机器人在有障碍物的环境中找到到达目标的有效路径。
-* **其他图相关问题**: 作为其他更复杂图算法的子模块，例如在某些类型的网络流问题或关键路径分析中。
+   public:
+    DijkstraHeap(int v) : vertices(v), graph(v) {}
 
-总而言之，Dijkstra 算法是图论中一个非常基础且重要的算法，它为解决各种实际世界中的最短路径问题提供了强大的工具。
+    /**
+     * @brief 添加一条边到图中
+     * @param u 起点
+     * @param v 终点
+     * @param weight 边的权重
+     */
+    void addEdge(int u, int v, int weight) { graph[u].push_back({v, weight}); }
+
+    /**
+     * @brief 使用Dijkstra算法计算从起点到所有顶点的最短路径
+     * @param start 起点
+     * @return 返回一个pair，包含距离数组和前驱节点数组
+     */
+    pair<vector<int>, vector<int>> dijkstra(int start) {
+        // 初始化距离数组和前驱节点数组
+        vector<int> distances(vertices, numeric_limits<int>::max());
+        vector<int> predecessors(vertices, -1);
+        distances[start] = 0;
+
+        // 优先队列，存储{距离, 顶点}对
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        pq.push({0, start});
+
+        while (!pq.empty()) {
+            int currentDistance = pq.top().first;
+            int currentVertex = pq.top().second;
+            pq.pop();
+
+            // 如果当前距离大于已知距离，跳过
+            if (currentDistance > distances[currentVertex]) {
+                continue;
+            }
+
+            // 遍历当前顶点的所有邻居
+            for (const auto& neighbor : graph[currentVertex]) {
+                int nextVertex = neighbor.first;
+                int weight = neighbor.second;
+                int distance = currentDistance + weight;
+
+                // 如果找到更短的路径，更新距离和前驱节点
+                if (distance < distances[nextVertex]) {
+                    distances[nextVertex] = distance;
+                    predecessors[nextVertex] = currentVertex;
+                    pq.push({distance, nextVertex});
+                }
+            }
+        }
+
+        return {distances, predecessors};
+    }
+
+    /**
+     * @brief 获取从起点到终点的最短路径
+     * @param start 起点
+     * @param end 终点
+     * @return 返回一个包含路径顶点的向量
+     */
+    vector<int> getShortestPath(int start, int end) {
+        auto [distances, predecessors] = dijkstra(start);
+        vector<int> path;
+
+        if (distances[end] == numeric_limits<int>::max()) {
+            return path;  // 没有路径
+        }
+
+        // 重建路径
+        for (int current = end; current != -1;
+             current = predecessors[current]) {
+            path.push_back(current);
+        }
+        reverse(path.begin(), path.end());
+        return path;
+    }
+};
+```
 
 
 
+# Bellman-Ford （可以处理带负权的边）
+
+Bellman-Ford 算法（贝尔曼-福特算法）是一种用于解决**带权有向图中单源最短路径问题**的算法。与 Dijkstra 算法不同，**Bellman-Ford 算法可以处理边权为负数的情况**。此外，它还能**检测图中是否存在从源点可达的负权环路（Negative Cycle）**。如果存在负权环路，那么最短路径理论上可以无限小（通过不断在环路中循环）。
+
+### 核心原理 (Core Principle)
+
+Bellman-Ford 算法的核心思想是**迭代松弛 (Iterative Relaxation)**。它通过对图中的所有边进行多次松弛操作，逐步逼近最短路径。
+
+1. **初始化**:
+
+   - 创建一个距离数组 `dist`，`dist[s]` (源点 `s` 到自身的距离) 初始化为 0，所有其他节点 `v` 的 `dist[v]` 初始化为无穷大（表示目前从源点不可达）。
+   - （可选）创建一个前驱数组 `predecessor`，用于记录最短路径上的前一个节点，方便路径回溯。`predecessor[v]` 初始化为 `null`。
+
+2. **迭代松弛**:
+
+   - 对图中的所有边进行 `|V| - 1` 次迭代（其中 `|V|` 是图中顶点的数量）。
+   - 在每一次迭代中，遍历图中的每一条边 `(u, v)`，如果通过顶点 `u` 到达顶点 `v` 的路径比当前已知的到 `v` 的路径更短（即 `dist[u] + weight(u, v) < dist[v]`），则更新 `dist[v]` 的值为 `dist[u] + weight(u, v)`，并记录 `predecessor[v] = u`。
+
+   这个过程基于一个重要的性质：从源点 `s` 到任何其他顶点 `v` 的最短路径，如果不存在负权环路，其包含的边数最多为 `|V| - 1`。因此，经过 `|V| - 1` 次迭代后，所有不涉及负权环路的最短路径都应该已经被找到。
+
+3. **负权环路检测**:
+
+   - 在完成 `|V| - 1` 次迭代后，再进行**一次额外**的迭代。
+   - 遍历图中的每一条边 `(u, v)`，如果仍然可以进行松弛操作（即 `dist[u] + weight(u, v) < dist[v]`），则说明图中存在从源点可达的负权环路。这意味着没有定义明确的最短路径（因为可以无限次地遍历这个负权环来减少路径长度）。
+
+------
+
+### 算法步骤 (Algorithm Steps)
+
+以下是 Bellman-Ford 算法更具体的步骤：
+
+1. **初始化**:
+
+   - 对于图中的每个顶点 `v`：
+     - `dist[v] = ∞`
+     - `predecessor[v] = null`
+   - `dist[source] = 0`
+
+2. **迭代松弛**:
+
+   - For `i` from `1` to `|V| - 1` do:
+
+     - For 每一条边 `(u, v)`及其权重 `w(u, v)` 在图 `G` 中 ` do`:
+       
+       - If `dist[u] + w(u, v) < dist[v]` then :
+       
+           - `dist[v] = dist[u] + w(u, v)`
+       
+           - `predecessor[v] = u`
+       
+   
+3. **检测负权环路**:
+
+   - For 每一条边 `(u, v)`及其权重 `w(u, v)`在图 `G`中 do:
+
+      - If `dist[u] + w(u, v) < dist[v]`   then :
+
+       - **Return** "图中存在负权环路" （或者标记受影响的节点，表明它们的最短路径无法确定）
+   
+4. **返回结果**:
+
+   - 如果未检测到负权环路，则 `dist` 数组包含从源点到所有其他顶点的最短路径长度，`predecessor` 数组可以用来重构最短路径。
+
+------
+
+### 优缺点 (Advantages and Disadvantages)
+
+**优点 (Advantages):**
+
+- **能处理负权边**: 这是 Bellman-Ford 算法相对于 Dijkstra 算法最主要的优势。
+- **能检测负权环路**: 可以报告图中是否存在使得最短路径无限小的负权环路。
+- **原理相对简单**: 算法的迭代松弛思想比较直观。
+
+**缺点 (Disadvantages):**
+
+- **时间复杂度较高**: Bellman-Ford 算法的时间复杂度为 O(V⋅E)，其中 V 是顶点数，E 是边数。在稠密图中，这可能高达 O(V3)。相比之下，Dijkstra 算法使用优先队列优化后可以达到 O(E+VlogV)，在很多情况下更快。
+- **对于没有负权边的图，Dijkstra 更优**: 如果图中所有边的权重都是非负的，Dijkstra 算法通常是更好的选择，因为它更快。
+
+------
 
 
 
+```c++
+#include <iostream>
+#include <vector>
+#include <limits>
+using namespace std;
 
+class BellmanFord {
+private:
+    int vertices;
+    struct Edge {
+        int from, to, weight;
+        Edge(int f, int t, int w) : from(f), to(t), weight(w) {}
+    };
+    vector<Edge> edges;
 
+public:
+    BellmanFord(int v) : vertices(v) {}
+
+    /**
+     * @brief 添加一条边到图中
+     * @param from 起点
+     * @param to 终点
+     * @param weight 边的权重
+     */
+    void addEdge(int from, int to, int weight) {
+        edges.emplace_back(from, to, weight);
+    }
+
+    /**
+     * @brief 使用Bellman-Ford算法计算从起点到所有顶点的最短路径
+     * @param start 起点
+     * @return 返回一个pair，包含距离数组和前驱节点数组，如果存在负环则返回空数组
+     */
+    pair<vector<int>, vector<int>> bellmanFord(int start) {
+        // 初始化距离数组和前驱节点数组
+        vector<int> distances(vertices, numeric_limits<int>::max());
+        vector<int> predecessors(vertices, -1);
+        distances[start] = 0;
+
+        // 进行V-1次松弛操作
+        for (int i = 1; i < vertices; i++) {
+            for (const Edge& edge : edges) {
+                if (distances[edge.from] != numeric_limits<int>::max() &&
+                    distances[edge.from] + edge.weight < distances[edge.to]) {
+                    distances[edge.to] = distances[edge.from] + edge.weight;
+                    predecessors[edge.to] = edge.from;
+                }
+            }
+        }
+
+        // 检查是否存在负环
+        for (const Edge& edge : edges) {
+            if (distances[edge.from] != numeric_limits<int>::max() &&
+                distances[edge.from] + edge.weight < distances[edge.to]) {
+                // 存在负环，返回空数组
+                return {{}, {}};
+            }
+        }
+
+        return {distances, predecessors};
+    }
+
+    /**
+     * @brief 获取从起点到终点的最短路径
+     * @param start 起点
+     * @param end 终点
+     * @return 返回路径列表，如果不存在路径或存在负环则返回空列表
+     */
+    vector<int> getShortestPath(int start, int end) {
+        auto [distances, predecessors] = bellmanFord(start);
+
+        // 检查是否存在负环或无法到达终点
+        if (distances.empty() || distances[end] == numeric_limits<int>::max()) {
+            return {};
+        }
+
+        // 重建路径
+        vector<int> path;
+        for (int current = end; current != -1; current = predecessors[current]) {
+            path.push_back(current);
+        }
+        reverse(path.begin(), path.end());
+        return path;
+    }
+};
+
+```
 
 
 
